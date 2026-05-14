@@ -1,3 +1,9 @@
+.container { max-width: 800px; margin: 0 auto; padding: 2rem; text-align: center; }
+.run-btn { padding: 1rem 2rem; font-size: 1.2rem; cursor: pointer; background: #646cff; color: white; border: none; border-radius: 8px; }
+.stats-card { margin-top: 2rem; padding: 2rem; border: 1px solid #ddd; border-radius: 12px; background: #f9f9f9; color: #222 }
+
+
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
