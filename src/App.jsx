@@ -3,30 +3,28 @@ import './App.css';
 import { MEAL_OPTIONS, CONSTANTS } from './data/simulationData';
 import { useMonteCarlo } from './hooks/useMonteCarlo';
 import { normalizeWeights } from './utils/monteCarloUtils';
-import WeightChart from './components/WeightChart';
-
 
 // Components
 import MetricInput from './components/MetricInput';
 import StrategyManager from './components/StrategyManager';
+import WeightChart from './components/WeightChart';
+import MacroSummary from './components/MacroSummary';
 
 function App() {
-  // 1. Physical Metrics State
+  // 1. Local State
   const [userMetrics, setUserMetrics] = useState({
-    startingWeight: CONSTANTS.STARTING_WEIGHT,
-    maintenanceCal: CONSTANTS.MAINTENANCE_CAL,
+    startingWeight: CONSTANTS.STARTING_WEIGHT, // Now 78
+    maintenanceCal: CONSTANTS.MAINTENANCE_CAL, // Now 2600
     pizzaProb: 0.02, 
   });
 
-  // 2. Meal Strategy State (Initialized from our data file)
   const [meals, setMeals] = useState(MEAL_OPTIONS);
 
-  // 3. The Logic Engine Hook
+  // 2. Hook
   const { results, loading, runSimulation } = useMonteCarlo();
 
-  // 4. Handlers
+  // 3. Handlers
   const handleStartSim = () => {
-    // Run simulation using current state values
     runSimulation({ 
       ...userMetrics, 
       meals: meals 
@@ -36,8 +34,6 @@ function App() {
   const handleMealWeightChange = (category, index, newWeight) => {
     const updatedCategory = [...meals[category]];
     updatedCategory[index].weight = newWeight;
-    
-    // Normalize ensures the sum of weights is always 1.0 (100%)
     const normalized = normalizeWeights(updatedCategory);
     
     setMeals({
@@ -49,86 +45,69 @@ function App() {
   return (
     <div className="container">
       <header>
-        <h1>Monte Carlo Fitness Odyssey</h1>
-        <p>Simulating 100 days of habits for a {userMetrics.startingWeight}kg individual.</p>
+        <h1>Monte Carlo Fitness Sim</h1>
+        <p>Projecting 100 days of habits starting at {userMetrics.startingWeight}kg</p>
       </header>
 
       <main className="dashboard">
-        {/* Left Column: Configuration */}
         <section className="controls">
           <div className="card">
-            <h2>1. Physical Parameters</h2>
+            <h2>User Inputs</h2>
             <MetricInput 
-              label="Current Weight"
+              label="Starting Weight"
               unit="kg"
-              min={40}
-              max={150}
+              min={40} max={150}
               value={userMetrics.startingWeight}
               onChange={(val) => setUserMetrics({...userMetrics, startingWeight: val})}
             />
-
             <MetricInput 
-              label="Maintenance Calories"
+              label="Maintenance"
               unit="kcal"
-              min={1200}
-              max={4000}
-              step={50}
+              min={1500} max={4000} step={50}
               value={userMetrics.maintenanceCal}
               onChange={(val) => setUserMetrics({...userMetrics, maintenanceCal: val})}
             />
-
             <MetricInput 
-              label="Pizza Night Probability"
+              label="Pizza Probability"
               unit="%"
-              min={0}
-              max={1}
-              step={0.01}
+              min={0} max={1} step={0.01}
               value={userMetrics.pizzaProb}
               onChange={(val) => setUserMetrics({...userMetrics, pizzaProb: val})}
             />
           </div>
 
           <div className="card">
-            <h2>2. Eating Strategy</h2>
+            <h2>Habit Weights</h2>
             <StrategyManager 
               title="Breakfast"
               options={meals.breakfast}
-              onWeightChange={(index, val) => handleMealWeightChange('breakfast', index, val)}
-            />
-            <StrategyManager 
-              title="Lunch/Dinner"
-              options={meals.lunch}
-              onWeightChange={(index, val) => handleMealWeightChange('lunch', index, val)}
+              onWeightChange={(idx, val) => handleMealWeightChange('breakfast', idx, val)}
             />
           </div>
 
-          <button 
-            className="run-btn" 
-            onClick={handleStartSim}
-            disabled={loading}
-          >
-            {loading ? "Simulating..." : "Run 100-Day Simulation"}
+          <button className="run-btn" onClick={handleStartSim} disabled={loading}>
+            {loading ? "Running..." : "Run Simulation"}
           </button>
         </section>
 
-        {/* Right Column: Results */}
         <section className="results-panel">
           {results ? (
             <div className="stats-card">
-              <h2>Projected Result</h2>
-              <div className="big-stat">
-                {results[results.length - 1].weight} <span>kg</span>
+              <div className="result-header">
+                <div className="big-stat">
+                  <label>Final Weight</label>
+                  <strong>{results[results.length - 1].weight} kg</strong>
+                </div>
+                <MacroSummary results={results} />
               </div>
-              <p>Estimated weight after 100 days</p>
-      
-              {/* THE CHART */}
+              
               <WeightChart data={results} />
             </div>
-         ) : (
-          <div className="empty-state">
-             <p>Adjust your habits and click run to see the "Jagged Line" of your future progress.</p>
-          </div>
-   )}
+          ) : (
+            <div className="empty-state">
+              <p>Configure your habits and click run.</p>
+            </div>
+          )}
         </section>
       </main>
     </div>

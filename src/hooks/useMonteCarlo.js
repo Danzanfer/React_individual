@@ -9,8 +9,6 @@ export const useMonteCarlo = () => {
   const runSimulation = useCallback((config) => {
     setLoading(true);
     
-    // We wrap the logic in a small timeout or use direct execution
-    // In a real 10,000 iteration sim, this keeps the UI responsive
     const { startingWeight, maintenanceCal, pizzaProb, meals } = config;
     
     let currentWeight = parseFloat(startingWeight);
@@ -19,37 +17,39 @@ export const useMonteCarlo = () => {
 
     for (let day = 1; day <= totalDays; day++) {
       let dailyCals = 0;
+      let dailyProt = 0;
 
-      // 1. Roll for Breakfast
+      // 1. Breakfast
       const breakfast = getRandomItem(meals.breakfast);
       dailyCals += breakfast.cal;
+      dailyProt += breakfast.prot;
 
-      // 2. Roll for Lunch
+      // 2. Lunch
       const lunch = getRandomItem(meals.lunch);
       dailyCals += lunch.cal;
+      dailyProt += lunch.prot;
 
-      // 3. The "Pizza" Logic (The Spike)
-      // If Math.random() is less than the probability (e.g. 0.02), it's a pizza night
+      // 3. Dinner (Pizza vs. Normal)
       if (Math.random() < pizzaProb) {
-        dailyCals += CONSTANTS.PIZZA_CAL; 
+        dailyCals += CONSTANTS.PIZZA_CAL;
+        dailyProt += CONSTANTS.PIZZA_PROT;
       } else {
-        // Normal Dinner (we'll use lunch options as a proxy for dinner variety)
+        // Using lunch options as a proxy for dinner
         const dinner = getRandomItem(meals.lunch);
         dailyCals += dinner.cal;
+        dailyProt += dinner.prot;
       }
 
-      // 4. Calculate Metric Weight Change
-      // (Daily Intake - Maintenance) / 7700
+      // 4. Logic: (Intake - Maintenance) / 7700
       const deficit = dailyCals - maintenanceCal;
       const weightChange = calculateWeightChange(deficit);
-      
       currentWeight += weightChange;
 
-      // Store this "Universe's" day in the history array
       history.push({
         day,
-        weight: currentWeight.toFixed(2),
-        dailyCals
+        weight: parseFloat(currentWeight.toFixed(2)),
+        dailyCals,
+        dailyProt
       });
     }
 
