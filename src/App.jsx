@@ -3,6 +3,8 @@ import './App.css';
 import { MEAL_OPTIONS, CONSTANTS } from './data/simulationData';
 import { useMonteCarlo } from './hooks/useMonteCarlo';
 import { normalizeWeights } from './utils/monteCarloUtils';
+import WeightChart from './components/WeightChart';
+
 
 // Components
 import MetricInput from './components/MetricInput';
@@ -118,17 +120,15 @@ function App() {
                 {results[results.length - 1].weight} <span>kg</span>
               </div>
               <p>Estimated weight after 100 days</p>
-              
-              {/* This is a placeholder for the Chart we will build next */}
-              <div className="chart-placeholder">
-                <p>Chart Data Ready: {results.length} data points generated.</p>
-              </div>
+      
+              {/* THE CHART */}
+              <WeightChart data={results} />
             </div>
-          ) : (
-            <div className="empty-state">
-              <p>Adjust your habits and click run to see the "Jagged Line" of your future progress.</p>
-            </div>
-          )}
+         ) : (
+          <div className="empty-state">
+             <p>Adjust your habits and click run to see the "Jagged Line" of your future progress.</p>
+          </div>
+   )}
         </section>
       </main>
     </div>
