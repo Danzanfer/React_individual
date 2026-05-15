@@ -5,20 +5,28 @@ import { useMonteCarlo } from './hooks/useMonteCarlo';
 import { normalizeWeights } from './utils/monteCarloUtils';
 
 // Components
-import MetricInput from './components/MetricInput';
+// Fíjate que no hace falta poner .jsx al final, Vite lo busca solo
+import MetricInput from './components/MetricInput'; 
 import StrategyManager from './components/StrategyManager';
 import WeightChart from './components/WeightChart';
 import MacroSummary from './components/MacroSummary';
 
 function App() {
   // 1. Local State
+ 
+
   const [userMetrics, setUserMetrics] = useState({
     startingWeight: CONSTANTS.STARTING_WEIGHT, // Now 78
     maintenanceCal: CONSTANTS.MAINTENANCE_CAL, // Now 2600
     pizzaProb: 0.02, 
   });
 
-  const [meals, setMeals] = useState(MEAL_OPTIONS);
+  // CORREGIDO AQUÍ: Cambiado 'initialMeals' por 'MEAL_OPTIONS'
+  const [meals, setMeals] = useState({
+    breakfast: MEAL_OPTIONS.breakfast || [],
+    lunch: MEAL_OPTIONS.lunch || [],
+    dinner: MEAL_OPTIONS.dinner || MEAL_OPTIONS.lunch 
+  });
 
   // 2. Hook
   const { results, loading, runSimulation } = useMonteCarlo();
@@ -31,14 +39,15 @@ function App() {
     });
   };
 
-  const handleMealWeightChange = (category, index, newWeight) => {
-    const updatedCategory = [...meals[category]];
-    updatedCategory[index].weight = newWeight;
-    const normalized = normalizeWeights(updatedCategory);
-    
-    setMeals({
-      ...meals,
-      [category]: normalized
+  const handleMealWeightChange = (category, index, newValue) => {
+    setMeals(prevMeals => {
+      const updatedCategory = [...prevMeals[category]];
+      updatedCategory[index] = { ...updatedCategory[index], weight: newValue };
+      
+      return {
+        ...prevMeals,
+        [category]: updatedCategory // Esto actualiza dinámicamente 'breakfast', 'lunch' o 'dinner'
+      };
     });
   };
 
@@ -78,10 +87,30 @@ function App() {
 
           <div className="card">
             <h2>Habit Weights</h2>
+            
+            {/* 1. PANEL DE DESAYUNO */}
             <StrategyManager 
-              title="Breakfast"
+              title="Breakfast Options"
               options={meals.breakfast}
               onWeightChange={(idx, val) => handleMealWeightChange('breakfast', idx, val)}
+            />
+            
+            <hr style={{ margin: '1.5rem 0', borderColor: '#eee' }} />
+
+            {/* 2. PANEL DE ALMUERZO */}
+            <StrategyManager 
+              title="Lunch Options"
+              options={meals.lunch}
+              onWeightChange={(idx, val) => handleMealWeightChange('lunch', idx, val)}
+            />
+
+            <hr style={{ margin: '1.5rem 0', borderColor: '#eee' }} />
+
+            {/* 3. PANEL DE CENA */}
+            <StrategyManager 
+              title="Dinner Options"
+              options={meals.dinner}
+              onWeightChange={(idx, val) => handleMealWeightChange('dinner', idx, val)}
             />
           </div>
 

@@ -5,10 +5,12 @@
  */
 
 export const getRandomItem = (options) => {
-    const random = Math.random();
-    let cumulativeWeight=0;
+    const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+    
+    const random = Math.random() * totalWeight;
+    let cumulativeWeight = 0;
 
-    for (const option of options){
+    for (const option of options) {
         cumulativeWeight += option.weight;
         if (random < cumulativeWeight) {
             return option;
@@ -17,12 +19,15 @@ export const getRandomItem = (options) => {
     return options[0];
 };
 
-export const normalizaWeights = (options) => {
-    const total = options.reduce((sum,opt)=> sum + opt.weight, 0);
+
+
+export const normalizeWeights = (options) => {
+    const total = options.reduce((sum, opt) => sum + opt.weight, 0);
     return options.map(opt => ({ 
         ...opt, 
-        weight: opt.weight / total }));
-}
+        weight: opt.weight / total 
+    }));
+};
 /**
  * Metric Weight Change Formula
  * Based on the 7,700 kcal per 1kg rule.

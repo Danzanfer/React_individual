@@ -5,7 +5,6 @@ export const MEAL_OPTIONS = {
     { name: "Eggs", weight: 0.05, cal: 450, prot: 30 },
   ],
   lunch: [
-    { name: "Burrito", weight: 0.30, cal: 700, prot: 35 },
     { name: "Chicken & Rice", weight: 0.30, cal: 550, prot: 40 },
     { name: "Chicken Strips", weight: 0.10, cal: 800, prot: 25 },
     { name: "Roast Beef", weight: 0.30, cal: 650, prot: 45 },
@@ -17,5 +16,5 @@ export const CONSTANTS = {
   PIZZA_PROT: 120,
   KCAL_PER_KG: 7700,
   STARTING_WEIGHT: 78,
-  MAINTENANCE_CAL: 2600, // Based on a 78kg person (e.g., 78kg  33 kcal/kg approx 2574 kcal)
+  MAINTENANCE_CAL: 2600,
 };

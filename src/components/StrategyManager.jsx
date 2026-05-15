@@ -3,7 +3,7 @@ import React from 'react';
 const StrategyManager = ({ title, options, onWeightChange }) => {
   return (
     <div className="strategy-card">
-      <h3>{title} Distribution</h3>
+      <h3>{title}</h3>
       {options.map((option, index) => (
         <div key={option.name} className="strategy-item">
           <div className="item-info">

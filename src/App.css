@@ -30,18 +30,25 @@ header {
 }
 
 .card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  margin-bottom: 1.5rem;
+  background-color: #ffffff !important; 
+  color: #1a1a1a !important;            
+  padding: 20px;
+  border-radius: 8px;
+  box-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.controls h2, .card h2 {
-  font-size: 1.2rem;
+.card h2 {
+  color: #111111 !important;
   margin-top: 0;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
+  margin-bottom: 15px;
+}
+
+.card h3 {
+  color: #333333 !important;
+}
+
+.card label {
+  color: #4a4a4a !important;
 }
 
 .input-group {
