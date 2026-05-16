@@ -150,3 +150,31 @@ header {
   font-weight: bold;
   color: #646cff;
 }
+
+.today-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.meal-suggestion {
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.meal-suggestion span { font-size: 0.7rem; color: #64748b; font-weight: bold; }
+.meal-suggestion strong { font-size: 1rem; color: #1e293b; margin: 4px 0; }
+.meal-suggestion small { font-size: 0.8rem; color: #94a3b8; }
+
+.today-btn {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}

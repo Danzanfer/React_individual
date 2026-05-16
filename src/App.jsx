@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import './App.css';
 import { MEAL_OPTIONS, CONSTANTS } from './data/simulationData';
 import { useMonteCarlo } from './hooks/useMonteCarlo';
-import { normalizeWeights } from './utils/monteCarloUtils';
+import { getRandomItem, normalizeWeights } from './utils/monteCarloUtils';
 
 // Components
-// Fíjate que no hace falta poner .jsx al final, Vite lo busca solo
 import MetricInput from './components/MetricInput'; 
 import StrategyManager from './components/StrategyManager';
 import WeightChart from './components/WeightChart';
@@ -13,20 +12,20 @@ import MacroSummary from './components/MacroSummary';
 
 function App() {
   // 1. Local State
- 
-
   const [userMetrics, setUserMetrics] = useState({
-    startingWeight: CONSTANTS.STARTING_WEIGHT, // Now 78
-    maintenanceCal: CONSTANTS.MAINTENANCE_CAL, // Now 2600
+    startingWeight: CONSTANTS.STARTING_WEIGHT,
+    maintenanceCal: CONSTANTS.MAINTENANCE_CAL,
     pizzaProb: 0.02, 
   });
 
-  // CORREGIDO AQUÍ: Cambiado 'initialMeals' por 'MEAL_OPTIONS'
   const [meals, setMeals] = useState({
     breakfast: MEAL_OPTIONS.breakfast || [],
     lunch: MEAL_OPTIONS.lunch || [],
-    dinner: MEAL_OPTIONS.dinner || MEAL_OPTIONS.lunch 
+    dinner: MEAL_OPTIONS.dinner || MEAL_OPTIONS.lunch
   });
+
+  // Estado para el plan sugerido del día
+  const [todayPlan, setTodayPlan] = useState(null);
 
   // 2. Hook
   const { results, loading, runSimulation } = useMonteCarlo();
@@ -35,8 +34,14 @@ function App() {
   const handleStartSim = () => {
     runSimulation({ 
       ...userMetrics, 
-      meals: meals 
+      meals: {
+        breakfast: normalizeWeights(meals.breakfast),
+        lunch: normalizeWeights(meals.lunch),
+        dinner: normalizeWeights(meals.dinner)
+      } 
     });
+    // Limpiamos el plan diario al correr una nueva simulación para evitar confusión
+    setTodayPlan(null);
   };
 
   const handleMealWeightChange = (category, index, newValue) => {
@@ -46,9 +51,21 @@ function App() {
       
       return {
         ...prevMeals,
-        [category]: updatedCategory // Esto actualiza dinámicamente 'breakfast', 'lunch' o 'dinner'
+        [category]: updatedCategory 
       };
     });
+  };
+
+  // Función para generar la recomendación de hoy según probabilidades elegidas
+  const generateTodayPlan = () => {
+    const plan = {
+      breakfast: getRandomItem(normalizeWeights(meals.breakfast)),
+      lunch: getRandomItem(normalizeWeights(meals.lunch)),
+      dinner: Math.random() < userMetrics.pizzaProb 
+        ? { name: '🍕 Pizza Night!', cal: CONSTANTS.PIZZA_CAL, prot: CONSTANTS.PIZZA_PROT }
+        : getRandomItem(normalizeWeights(meals.dinner || meals.lunch))
+    };
+    setTodayPlan(plan);
   };
 
   return (
@@ -88,7 +105,6 @@ function App() {
           <div className="card">
             <h2>Habit Weights</h2>
             
-            {/* 1. PANEL DE DESAYUNO */}
             <StrategyManager 
               title="Breakfast Options"
               options={meals.breakfast}
@@ -97,7 +113,6 @@ function App() {
             
             <hr style={{ margin: '1.5rem 0', borderColor: '#eee' }} />
 
-            {/* 2. PANEL DE ALMUERZO */}
             <StrategyManager 
               title="Lunch Options"
               options={meals.lunch}
@@ -106,7 +121,6 @@ function App() {
 
             <hr style={{ margin: '1.5rem 0', borderColor: '#eee' }} />
 
-            {/* 3. PANEL DE CENA */}
             <StrategyManager 
               title="Dinner Options"
               options={meals.dinner}
@@ -121,17 +135,52 @@ function App() {
 
         <section className="results-panel">
           {results ? (
-            <div className="stats-card">
-              <div className="result-header">
-                <div className="big-stat">
-                  <label>Final Weight</label>
-                  <strong>{results[results.length - 1].weight} kg</strong>
+            <>
+              <div className="stats-card">
+                <div className="result-header">
+                  <div className="big-stat">
+                    <label>Final Weight</label>
+                    <strong>{results[results.length - 1].weight} kg</strong>
+                  </div>
+                  <MacroSummary results={results} />
                 </div>
-                <MacroSummary results={results} />
+                <WeightChart data={results} />
               </div>
-              
-              <WeightChart data={results} />
-            </div>
+
+              {/* NUEVA TARJETA: PLAN DEL DÍA ACCIONABLE */}
+              <div className="card" style={{ marginTop: '20px', borderTop: '4px solid #4a90e2' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                  <h2 style={{ margin: 0 }}>Today's Action Plan</h2>
+                  <button onClick={generateTodayPlan} className="today-btn">
+                    {todayPlan ? "Re-roll Menu" : "What should I eat today?"}
+                  </button>
+                </div>
+
+                {todayPlan ? (
+                  <div className="today-grid">
+                    <div className="meal-suggestion">
+                      <span>BREAKFAST</span>
+                      <strong>{todayPlan.breakfast.name}</strong>
+                      <small>{todayPlan.breakfast.cal} kcal</small>
+                    </div>
+                    <div className="meal-suggestion">
+                      <span>LUNCH</span>
+                      <strong>{todayPlan.lunch.name}</strong>
+                      <small>{todayPlan.lunch.cal} kcal</small>
+                    </div>
+                    <div className="meal-suggestion">
+                      <span>DINNER</span>
+                      <strong>{todayPlan.dinner.name}</strong>
+                      <small>{todayPlan.dinner.cal} kcal</small>
+                    </div>
+                  </div>
+                ) : (
+                  <p style={{ textAlign: 'center', color: '#666', fontStyle: 'italic' }}>
+                    Click the button to generate a specific menu based on your settings.
+                  </p>
+                )}
+              </div>
+            </>
           ) : (
             <div className="empty-state">
               <p>Configure your habits and click run.</p>

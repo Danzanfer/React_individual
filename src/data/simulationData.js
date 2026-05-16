@@ -7,7 +7,13 @@ export const MEAL_OPTIONS = {
   lunch: [
     { name: "Chicken & Rice", weight: 0.30, cal: 550, prot: 40 },
     { name: "Chicken Strips", weight: 0.10, cal: 800, prot: 25 },
-    { name: "Roast Beef", weight: 0.30, cal: 650, prot: 45 },
+    { name: "Roast Beef", weight: 0.30, cal: 650, prot: 45 }
+  ],
+  // AÑADE ESTO:
+  dinner: [
+    { name: "Salad & Salmon", weight: 0.40, cal: 500, prot: 35 },
+    { name: "Pasta", weight: 0.30, cal: 750, prot: 20 },
+    { name: "Oatmeal", weight: 0.20, cal: 400, prot: 15 },
   ]
 };
 
