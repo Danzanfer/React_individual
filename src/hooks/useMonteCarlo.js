@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { getRandomItem, calculateWeightChange } from '../utils/monteCarloUtils';
-import { CONSTANTS } from '../data/simulationData';
+import { selectMealByTiers, normalizeWeights, calculateWeightChange } from '../utils/monteCarloUtils';
+import { MEAL_OPTIONS, CONSTANTS } from '../data/simulationData';
 
 export const useMonteCarlo = () => {
   const [results, setResults] = useState(null);
@@ -8,60 +8,57 @@ export const useMonteCarlo = () => {
 
   const runSimulation = useCallback((config) => {
     setLoading(true);
-    
-    // Traemos de forma segura los datos de la interfaz
-    const { startingWeight, maintenanceCal, pizzaProb, meals } = config;
-    
-    let currentWeight = parseFloat(startingWeight);
+
+    const {
+      startingWeight,
+      maintenanceCal,
+      activeCal,
+      guiltyChance,
+      mealFrequencies,
+    } = config;
+
     const totalDays = 100;
+    let currentWeight = parseFloat(startingWeight);
+    const effectiveMaintenance = Number(maintenanceCal) + Number(activeCal);
+    const guiltyProbability = Math.min(1, Number(guiltyChance) / 100);
     const history = [];
 
     for (let day = 1; day <= totalDays; day++) {
-      let dailyCals = 0;
-      let dailyProt = 0;
+      const breakfast = selectMealByTiers(
+        MEAL_OPTIONS.breakfast,
+        mealFrequencies.breakfast.cal,
+        mealFrequencies.breakfast.prot,
+      );
+      const lunch = selectMealByTiers(
+        MEAL_OPTIONS.lunch,
+        mealFrequencies.lunch.cal,
+        mealFrequencies.lunch.prot,
+      );
 
-      // 1. Desayuno (Usa las opciones de breakfast de la interfaz)
-      if (meals?.breakfast && meals.breakfast.length > 0) {
-        const breakfast = getRandomItem(meals.breakfast);
-        dailyCals += breakfast.cal;
-        dailyProt += breakfast.prot;
-      }
+      const isGuiltyDay = Math.random() < guiltyProbability;
+      const dinner = isGuiltyDay
+        ? { ...CONSTANTS.GUILTY_DISH, isGuilty: true }
+        : { ...selectMealByTiers(
+            MEAL_OPTIONS.dinner,
+            mealFrequencies.dinner.cal,
+            mealFrequencies.dinner.prot,
+          ), isGuilty: false };
 
-      // 2. Almuerzo (Usa las opciones de lunch de la interfaz)
-      if (meals?.lunch && meals.lunch.length > 0) {
-        const lunch = getRandomItem(meals.lunch);
-        dailyCals += lunch.cal;
-        dailyProt += lunch.prot;
-      }
-
-      // 3. Cena (Lógica de Pizza vs Comida Normal)
-      if (Math.random() < pizzaProb) {
-        dailyCals += CONSTANTS.PIZZA_CAL;
-        dailyProt += CONSTANTS.PIZZA_PROT;
-      } else {
-        // Si tu objeto "meals" tiene "dinner", usa meals.dinner. Si no, usa meals.lunch
-        const dinnerOptions = meals?.dinner || meals?.lunch || [];
-        if (dinnerOptions.length > 0) {
-          const dinner = getRandomItem(dinnerOptions);
-          dailyCals += dinner.cal;
-          dailyProt += dinner.prot;
-        }
-      }
-
-      // 4. Lógica de Peso: (Calorías Consumidas - Calorías Gastadas)
-      // Si consumes 3000 y gastas 2600, netCalories es +400 (Superávit)
-      const netCalories = dailyCals - maintenanceCal; 
-      
-      // calculateWeightChange devolverá un valor positivo si hay superávit y negativo si hay déficit
+      const dailyCals = breakfast.cal + lunch.cal + dinner.cal;
+      const dailyProt = breakfast.prot + lunch.prot + dinner.prot;
+      const netCalories = dailyCals - effectiveMaintenance;
       const weightChange = calculateWeightChange(netCalories);
       currentWeight += weightChange;
 
-      // Guardamos el día en el historial
       history.push({
         day,
         weight: parseFloat(currentWeight.toFixed(2)),
         dailyCals,
-        dailyProt
+        dailyProt,
+        breakfast,
+        lunch,
+        dinner,
+        isGuilty: isGuiltyDay,
       });
     }
 

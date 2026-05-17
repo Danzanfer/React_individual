@@ -7,11 +7,11 @@ const MacroSummary = ({ results }) => {
   return (
     <div className="macro-summary">
       <div className="macro-item">
-        <span>Avg. Daily Protein</span>
-        <strong>{avgProtein.toFixed(0)}g</strong>
+        <span>Proteína promedio</span>
+        <strong>{avgProtein.toFixed(0)} g</strong>
       </div>
       <div className="macro-item">
-        <span>Avg. Daily Calories</span>
+        <span>Calorías promedio</span>
         <strong>{avgCals.toFixed(0)} kcal</strong>
       </div>
     </div>

@@ -1,16 +1,35 @@
-# React + Vite
+# MC Diet Planner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Esta es una aplicación React creada con Vite para simular un plan de dietas.
 
-Currently, two official plugins are available:
+La app permite:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- iniciar sesión o registrar un usuario en el navegador
+- configurar datos de dieta y niveles de comidas
+- ejecutar una simulación de 100 días con Monte Carlo
+- ver gráficos de peso, calorías y proteína
+- generar un plan diario de desayuno, almuerzo y cena
 
-## React Compiler
+## Archivos importantes
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `src/App.jsx`: controla las páginas principales y el estado de la aplicación.
+- `src/components/LoginPage.jsx`: formulario de inicio de sesión y registro.
+- `src/components/SetupPage.jsx`: pantalla de configuración, pasos y simulación.
+- `src/components/Dashboard.jsx`: muestra los resultados y el plan diario.
+- `src/hooks/useMonteCarlo.js`: hook personalizado que ejecuta la simulación.
+- `src/utils/authUtils.js`: maneja login y registro con `localStorage`.
 
-## Expanding the ESLint configuration
+## Cómo usar
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Instala dependencias y ejecuta el proyecto:
+
+```bash
+npm install
+npm run dev
+```
+
+Para construir la versión de producción:
+
+```bash
+npm run build
+```
